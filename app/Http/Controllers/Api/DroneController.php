@@ -17,7 +17,7 @@ class DroneController extends Controller
     public function reserve(Request $request, $orderId, DroneRepository $droneRepository)
     {
         $actor = $request->attributes->get('actor');
-
+        $order = Order::find($orderId);
         if (!($actor instanceof Drone)) {
             return ApiResponse::error('Forbidden, only drones can reserve orders', null, 403);
         }
@@ -30,8 +30,6 @@ class DroneController extends Controller
         if (in_array($actor->status, ['reserved', 'busy'])) {
             return ApiResponse::error('Drone is already handling another job.', null, 400);
         }
-
-        $order = Order::find($orderId);
 
         if (!$order) {
             return ApiResponse::error('Order not found', null, 404);
@@ -67,7 +65,10 @@ class DroneController extends Controller
         DB::beginTransaction();
 
         try {
-            $order = Order::findOrFail($orderId);
+            $order = Order::find($orderId);
+            if (!$order) {
+                return ApiResponse::error('Order not found', null, 404);
+            }
             $result = $repo->grabOrder($actor, $order);
             if (isset($result['error'])) {
                 return ApiResponse::error($result['error'], null, $result['code']);
@@ -92,7 +93,10 @@ class DroneController extends Controller
         DB::beginTransaction();
 
         try {
-            $order = Order::findOrFail($orderId);
+            $order = Order::find($orderId);
+            if (!$order) {
+                return ApiResponse::error('Order not found', null, 404);
+            }
             $result = $repo->markDelivered($actor, $order);
             if (isset($result['error'])) {
                 return ApiResponse::error($result['error'], null, $result['code']);
@@ -117,7 +121,10 @@ class DroneController extends Controller
         DB::beginTransaction();
 
         try {
-            $order = Order::findOrFail($orderId);
+            $order = Order::find($orderId);
+            if (!$order) {
+                return ApiResponse::error('Order not found', null, 404);
+            }
             $result = $repo->markFailed($actor, $order);
             if (isset($result['error'])) {
                 return ApiResponse::error($result['error'], null, $result['code']);

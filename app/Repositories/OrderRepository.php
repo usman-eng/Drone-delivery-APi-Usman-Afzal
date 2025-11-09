@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\Drone;
 use App\Models\Order;
 
 class OrderRepository
@@ -21,11 +22,19 @@ class OrderRepository
      */
     public static function withdrawOrder(Order $order): Order
     {
+        // If drone was reserved for this order, free it up
+        if ($order->drone_id) {
+            $drone = Drone::find($order->drone_id);
+
+            if ($drone) {
+                $drone->update(['status' => 'idle']);
+            }
+
+        }
         $order->update([
             'status' => 'withdrawn',
             'drone_id' => null
         ]);
-
         return $order;
     }
 
