@@ -18,10 +18,6 @@ class DroneController extends Controller
     {
         $actor = $request->attributes->get('actor');
         $order = Order::find($orderId);
-        if (!($actor instanceof Drone)) {
-            return ApiResponse::error('Forbidden, only drones can reserve orders', null, 403);
-        }
-
         // Prevent broken or unavailable drones from reserving
         if (in_array($actor->status, ['broken', 'maintenance'])) {
             return ApiResponse::error('Drone is broken or under maintenance. Cannot reserve jobs.', null, 403);
@@ -58,10 +54,6 @@ class DroneController extends Controller
     public function grab(Request $request, $orderId, DroneRepository $repo)
     {
         $actor = $request->attributes->get('actor');
-        if (!($actor instanceof Drone)) {
-            return ApiResponse::error('Forbidden, only drones can grab orders', null, 403);
-        }
-
         DB::beginTransaction();
 
         try {
@@ -86,10 +78,6 @@ class DroneController extends Controller
     public function delivered(Request $request, $orderId, DroneRepository $repo)
     {
         $actor = $request->attributes->get('actor');
-        if (!($actor instanceof Drone)) {
-            return ApiResponse::error('Forbidden, only drones can mark delivered', null, 403);
-        }
-
         DB::beginTransaction();
 
         try {
@@ -114,10 +102,6 @@ class DroneController extends Controller
     public function failed(Request $request, $orderId, DroneRepository $repo)
     {
         $actor = $request->attributes->get('actor');
-        if (!($actor instanceof Drone)) {
-            return ApiResponse::error('Forbidden, only drones can mark orders as failed', null, 403);
-        }
-
         DB::beginTransaction();
 
         try {
@@ -142,9 +126,6 @@ class DroneController extends Controller
     public function markBroken(Request $request, DroneRepository $repo)
     {
         $actor = $request->attributes->get('actor');
-        if (!($actor instanceof Drone)) {
-            return ApiResponse::error('Forbidden, only drones can mark themselves as broken', null, 403);
-        }
 
         DB::beginTransaction();
 
@@ -169,9 +150,6 @@ class DroneController extends Controller
         ]);
 
         $actor = $request->attributes->get('actor');
-        if (!($actor instanceof Drone)) {
-            return ApiResponse::error('Forbidden, only drones can send heartbeat', null, 403);
-        }
 
         DB::beginTransaction();
 
@@ -190,8 +168,6 @@ class DroneController extends Controller
     public function assignedOrder(Request $request)
     {
         $actor = $request->attributes->get('actor');
-        if (!($actor instanceof Drone))
-            return ApiResponse::error('Forbidden', null, 403);
 
         $order = $actor->assignedOrder()->first();
         if ($order) {

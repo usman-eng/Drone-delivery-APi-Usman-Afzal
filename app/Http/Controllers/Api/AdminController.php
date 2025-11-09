@@ -15,17 +15,9 @@ use Throwable;
 
 class AdminController extends Controller
 {
-    protected function ensureAdmin(Request $request)
-    {
-        $claims = $request->attributes->get('jwt_claims', []);
-        if (($claims['type'] ?? '') !== 'admin')
-            abort(403, 'Admin only');
-    }
-
-    // Bulk get orders (with filters)
+    // Bulk get orders
     public function bulkOrders(Request $request)
     {
-        $this->ensureAdmin($request);
         $orders = Order::with(['user:id,name', 'drone:id,identifier'])
             ->when($request->has('status'), function ($q) use ($request) {
                 $q->where('status', $request->status);
@@ -37,7 +29,6 @@ class AdminController extends Controller
     // Change origin/destination
     public function updateOrderLocation(AdminRequest $request, $id, OrderRepository $orderRepository)
     {
-        $this->ensureAdmin($request);
 
         DB::beginTransaction();
 
@@ -77,7 +68,6 @@ class AdminController extends Controller
     // List drones
     public function listDrones(Request $request)
     {
-        $this->ensureAdmin($request);
         $drones = Drone::get();
         return ApiResponse::success($drones, 'All dones get successfully');
     }
@@ -85,7 +75,6 @@ class AdminController extends Controller
     // Mark drone broken/fixed (when marking broken ensure handoff)
     public function markDrone(Request $request, $id, DroneRepository $droneRepository)
     {
-        $this->ensureAdmin($request);
 
         $request->validate([
             'action' => 'required|in:broken,fixed'

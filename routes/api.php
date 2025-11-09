@@ -7,7 +7,7 @@ use App\Http\Controllers\Api\AdminController;
 
 Route::post('/token', [AuthController::class, 'token']);
 // drone endpoints
-Route::middleware('jwt.auth')->group(function () {
+Route::middleware(['jwt.auth', 'role:drone'])->group(function () {
     // Drone-only actions
     Route::post('drones/{order}/reserve', [DroneController::class, 'reserve']);
     Route::post('drones/{order}/grab', [DroneController::class, 'grab']);
@@ -17,12 +17,18 @@ Route::middleware('jwt.auth')->group(function () {
     Route::post('drones/heartbeat', [DroneController::class, 'heartbeat']);
     Route::get('drones/assigned-order', [DroneController::class, 'assignedOrder']);
 
-    // enduser
+});
+
+// Enduser routes
+Route::middleware(['jwt.auth', 'role:enduser'])->group(function () {
     Route::post('orders', [OrderController::class, 'store']);
     Route::post('orders/{order}/withdraw', [OrderController::class, 'withdraw']);
     Route::get('orders', [OrderController::class, 'show']);
 
-    // admin
+});
+
+// Admin routes
+Route::middleware(['jwt.auth', 'role:admin'])->group(function () {
     Route::get('admin/orders', [AdminController::class, 'bulkOrders']);
     Route::put('admin/orders/{order}/location', [AdminController::class, 'updateOrderLocation']);
     Route::get('admin/drones', [AdminController::class, 'listDrones']);

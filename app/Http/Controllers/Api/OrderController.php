@@ -18,14 +18,7 @@ class OrderController extends Controller
     {
         DB::beginTransaction();
         try {
-            $claims = $request->attributes->get('jwt_claims', []);
             $user = $request->attributes->get('actor');
-            $type = $claims['type'] ?? null;
-
-            if ($type !== 'enduser' || !$user) {
-                return ApiResponse::error('Forbidden, only endusers', null, 403);
-            }
-
             $order = OrderRepository::createOrder(
                 $request->only([
                     'origin_address',
@@ -86,14 +79,7 @@ class OrderController extends Controller
     // Get details + ETA simulation
     public function show(Request $request)
     {
-        $claims = $request->attributes->get('jwt_claims', []);
         $user = $request->attributes->get('actor');
-
-        // Only allow enduser
-        if (($claims['type'] ?? '') !== 'enduser' || !$user) {
-            return ApiResponse::error('Unauthorized, only endusers', null, 403);
-        }
-
         // Fetch orders for the current user with drone info
         $orders = Order::with('drone')
             ->where('user_id', $user->id)
