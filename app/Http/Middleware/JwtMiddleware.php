@@ -34,7 +34,7 @@ class JwtMiddleware
             if ($drone) $request->attributes->set('actor', $drone);
         } else {
             $user = User::where('name', $claims['sub'])->first();
-            if ($user) $request->setUserResolver(fn()=>$user); // enable can() / roles via spatie
+            if ($user) $request->setUserResolver(fn()=>$user); 
             $request->attributes->set('actor', $user);
         }
 

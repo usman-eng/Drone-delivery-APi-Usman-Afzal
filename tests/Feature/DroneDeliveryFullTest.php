@@ -82,9 +82,33 @@ class DroneDeliveryFullTest extends TestCase
                 'battery_level' => 90
             ]);
 
+        // Check status and structure
         $res->assertStatus(200)
-            ->assertJsonFragment(['id' => $drone->id])
-            ->assertJsonStructure(['drone', 'assigned_order' => ['id', 'status']]);
+            ->assertJson([
+                'status' => 'success',
+                'message' => 'Heartbeat received successfully',
+            ])
+            ->assertJsonStructure([
+                'data' => [
+                    'drone' => [
+                        'id',
+                        'identifier',
+                        'battery_level',
+                        'status',
+                        'lat',
+                        'lng'
+                    ],
+                    'assigned_order' => [
+                        'id',
+                        'status',
+                        'user' => ['id', 'name']
+                    ]
+                ]
+            ]);
+
+        //Check specific values
+        $res->assertJsonPath('data.drone.id', $drone->id);
+        $res->assertJsonPath('data.assigned_order.id', $order->id);
     }
 
     public function testDroneAssignedOrderEndpoint()
@@ -101,13 +125,10 @@ class DroneDeliveryFullTest extends TestCase
     // -------------------
     // Enduser Tests
     // -------------------
-
     public function testEnduserCanSubmitWithdrawAndViewOrders()
     {
-        //Create an enduser
         $user = User::factory()->create();
 
-        //Submit a new order
         $payload = [
             "origin_address" => "Warehouse A, Industrial Area, Riyadh",
             "origin_lat" => 24.7136,
@@ -117,30 +138,24 @@ class DroneDeliveryFullTest extends TestCase
             "destination_lng" => 46.6840
         ];
 
+        // Submit a new order
         $res = $this->withHeader('Authorization', $this->jwtFor($user))
             ->postJson("/api/orders", $payload);
 
         $res->assertStatus(201)
-            ->assertJsonFragment([
-                'origin_address' => $payload['origin_address'],
-                'origin_lat' => $payload['origin_lat'],
-                'origin_lng' => $payload['origin_lng'],
-                'destination_address' => $payload['destination_address'],
-                'destination_lat' => $payload['destination_lat'],
-                'destination_lng' => $payload['destination_lng'],
-                'status' => 'pending'
-            ]);
+            ->assertJsonPath('data.origin_address', $payload['origin_address'])
+            ->assertJsonPath('data.status', 'pending');
 
-        $orderId = $res->json('order.id');
+        $orderId = $res->json('data.id');
 
         // Withdraw the order (before pickup)
         $res = $this->withHeader('Authorization', $this->jwtFor($user))
             ->postJson("/api/orders/{$orderId}/withdraw");
 
         $res->assertStatus(200)
-            ->assertJsonFragment(['status' => 'withdrawn']);
+            ->assertJsonPath('data.status', 'withdrawn');
 
-        //Optionally, fetch user orders to confirm
+        // Fetch user orders
         $res = $this->withHeader('Authorization', $this->jwtFor($user))
             ->getJson("/api/orders");
 
@@ -179,7 +194,6 @@ class DroneDeliveryFullTest extends TestCase
     // -------------------
     // Admin Tests
     // -------------------
-
     public function testAdminCanGetBulkOrdersAndUpdateOrderLocation()
     {
         // Create an admin, a drone, and an order

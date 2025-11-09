@@ -30,7 +30,9 @@ class OrderController extends Controller
                 ]),
                 $user->id
             );
+         
             DB::commit();
+            $order->refresh();
             return ApiResponse::success($order, 'Order created successfully', 201);
 
         } catch (Throwable $e) {

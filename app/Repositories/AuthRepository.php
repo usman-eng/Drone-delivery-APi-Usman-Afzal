@@ -17,11 +17,10 @@ class AuthRepository
 
         // Ensure entities exist
         if (in_array($type, ['admin', 'enduser'])) {
-            $user = User::firstOrCreate(
+            User::firstOrCreate(
                 ['name' => $name],
-                ['email' => "{$name}@local", 'password' => bcrypt(Str::random(16))]
+                ['email' => "{$name}@local",'type' => $type, 'password' => bcrypt(Str::random(16))]
             );
-            $user->assignRole($type);
         } else {
             Drone::firstOrCreate(['identifier' => $name]);
         }
