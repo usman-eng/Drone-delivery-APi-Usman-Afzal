@@ -17,17 +17,17 @@ class AuthController extends Controller
     //function to generate token according to role
     public function token(AuthRequest $request)
     {
-        DB::beginTransaction();
+        // DB::beginTransaction();
         try {
             $authRepository = new AuthRepository();
             $data = $authRepository->generateToken(
                 $request->input('name'),
                 $request->input('type')
             );
-            DB::commit();
+            // DB::commit();
             return ApiResponse::success($data, 'Token generated successfully.');
         } catch (Throwable $e) {
-            DB::rollBack();
+            // DB::rollBack();
             return ApiResponse::error('Failed to generate token', [
                 'exception' => $e->getMessage(),
             ], 500);
