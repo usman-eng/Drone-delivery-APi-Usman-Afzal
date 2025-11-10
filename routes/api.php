@@ -5,7 +5,7 @@ use App\Http\Controllers\Api\DroneController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\AdminController;
 
-Route::post('/token', [AuthController::class, 'token']);
+Route::post('/auth/token', [AuthController::class, 'token']);
 // drone endpoints
 Route::middleware(['jwt.auth', 'role:drone'])->group(function () {
     // Drone-only actions
