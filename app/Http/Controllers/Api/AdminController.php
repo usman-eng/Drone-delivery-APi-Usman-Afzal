@@ -30,7 +30,7 @@ class AdminController extends Controller
     public function updateOrderLocation(AdminRequest $request, $id, OrderRepository $orderRepository)
     {
 
-        // DB::beginTransaction();
+        DB::beginTransaction();
 
         try {
             $order = Order::find($id);
@@ -53,12 +53,12 @@ class AdminController extends Controller
             // Load related user and drone info
             $order->load(['user:id,name', 'drone:id,identifier']);
 
-            // DB::commit();
+            DB::commit();
 
             return ApiResponse::success($order, 'Order location updated successfully');
 
         } catch (Throwable $e) {
-            // DB::rollBack();
+            DB::rollBack();
             return ApiResponse::error('Failed to update order location', [
                 'exception' => $e->getMessage()
             ], 500);
@@ -80,7 +80,7 @@ class AdminController extends Controller
             'action' => 'required|in:broken,fixed'
         ]);
 
-        // DB::beginTransaction();
+        DB::beginTransaction();
 
         try {
             $drone = Drone::find($id);
@@ -91,12 +91,12 @@ class AdminController extends Controller
 
             $result = $droneRepository->updateStatus($drone, $request->action);
 
-            // DB::commit();
+            DB::commit();
 
             return ApiResponse::success($result, 'Drone status updated successfully');
 
         } catch (Throwable $e) {
-            // DB::rollBack();
+            DB::rollBack();
             return ApiResponse::error('Failed to update drone status', [
                 'exception' => $e->getMessage()
             ], 500);

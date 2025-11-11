@@ -31,19 +31,19 @@ class DroneController extends Controller
             return ApiResponse::error('Order not found', null, 404);
         }
 
-        // DB::beginTransaction();
+        DB::beginTransaction();
 
         try {
             $result = $droneRepository->reserveOrder($actor, $order);
             if (isset($result['error'])) {
                 return ApiResponse::error($result['error'], null, $result['code']);
             }
-            // DB::commit();
+            DB::commit();
 
             return ApiResponse::success($result, 'Order reserved successfully');
 
         } catch (Throwable $e) {
-            // DB::rollBack();
+            DB::rollBack();
             return ApiResponse::error('Failed to reserve order', [
                 'exception' => $e->getMessage()
             ], 500);
@@ -54,7 +54,7 @@ class DroneController extends Controller
     public function grab(Request $request, $orderId, DroneRepository $repo)
     {
         $actor = $request->attributes->get('actor');
-        // DB::beginTransaction();
+        DB::beginTransaction();
 
         try {
             $order = Order::find($orderId);
@@ -65,11 +65,11 @@ class DroneController extends Controller
             if (isset($result['error'])) {
                 return ApiResponse::error($result['error'], null, $result['code']);
             }
-            // DB::commit();
+            DB::commit();
 
             return ApiResponse::success($result, 'Order grabbed successfully');
         } catch (Throwable $e) {
-            // DB::rollBack();
+            DB::rollBack();
             return ApiResponse::error('Failed to grab order', ['exception' => $e->getMessage()], 500);
         }
     }
@@ -78,7 +78,7 @@ class DroneController extends Controller
     public function delivered(Request $request, $orderId, DroneRepository $repo)
     {
         $actor = $request->attributes->get('actor');
-        // DB::beginTransaction();
+        DB::beginTransaction();
 
         try {
             $order = Order::find($orderId);
@@ -89,11 +89,11 @@ class DroneController extends Controller
             if (isset($result['error'])) {
                 return ApiResponse::error($result['error'], null, $result['code']);
             }
-            // DB::commit();
+            DB::commit();
 
             return ApiResponse::success($result, 'Order delivered successfully');
         } catch (Throwable $e) {
-            // DB::rollBack();
+            DB::rollBack();
             return ApiResponse::error('Failed to mark order as delivered', ['exception' => $e->getMessage()], 500);
         }
     }
@@ -102,7 +102,7 @@ class DroneController extends Controller
     public function failed(Request $request, $orderId, DroneRepository $repo)
     {
         $actor = $request->attributes->get('actor');
-        // DB::beginTransaction();
+        DB::beginTransaction();
 
         try {
             $order = Order::find($orderId);
@@ -113,11 +113,11 @@ class DroneController extends Controller
             if (isset($result['error'])) {
                 return ApiResponse::error($result['error'], null, $result['code']);
             }
-            // DB::commit();
+            DB::commit();
 
             return ApiResponse::success($result, 'Order marked as failed successfully');
         } catch (Throwable $e) {
-            // DB::rollBack();
+            DB::rollBack();
             return ApiResponse::error('Failed to mark order as failed', ['exception' => $e->getMessage()], 500);
         }
     }
@@ -127,15 +127,15 @@ class DroneController extends Controller
     {
         $actor = $request->attributes->get('actor');
 
-        // DB::beginTransaction();
+        DB::beginTransaction();
 
         try {
             $result = $repo->markBroken($actor);
-            // DB::commit();
+            DB::commit();
 
             return ApiResponse::success($result, 'Drone marked as broken and active orders released successfully');
         } catch (Throwable $e) {
-            // DB::rollBack();
+            DB::rollBack();
             return ApiResponse::error('Failed to mark drone as broken', ['exception' => $e->getMessage()], 500);
         }
     }
@@ -151,15 +151,15 @@ class DroneController extends Controller
 
         $actor = $request->attributes->get('actor');
 
-        // DB::beginTransaction();
+        DB::beginTransaction();
 
         try {
             $result = $repo->heartbeat($actor, $request->only(['lat', 'lng', 'battery_level']));
-            // DB::commit();
+            DB::commit();
 
             return ApiResponse::success($result, 'Heartbeat received successfully');
         } catch (Throwable $e) {
-            // DB::rollBack();
+            DB::rollBack();
             return ApiResponse::error('Failed to process heartbeat', ['exception' => $e->getMessage()], 500);
         }
     }

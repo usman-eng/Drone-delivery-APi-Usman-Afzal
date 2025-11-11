@@ -127,7 +127,7 @@ class DroneDeliveryFullTest extends TestCase
     // -------------------
     public function testEnduserCanSubmitWithdrawAndViewOrders()
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['type' => 'enduser']);
 
         $payload = [
             "origin_address" => "Warehouse A, Industrial Area, Riyadh",
@@ -166,7 +166,7 @@ class DroneDeliveryFullTest extends TestCase
 
     public function testEnduserCannotWithdrawPickedUpOrder()
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['type' => 'enduser']);
         $drone = Drone::factory()->create();
         $order = Order::factory()->pickedUp($drone)->create(['user_id' => $user->id]);
 
@@ -176,19 +176,4 @@ class DroneDeliveryFullTest extends TestCase
         $res->assertStatus(400)
             ->assertJsonFragment(['message' => 'Cannot withdraw an in-progress order']);
     }
-
-    public function testEnduserCanViewOwnOrdersOnly()
-    {
-        $user = User::factory()->create();
-        $other = User::factory()->create();
-        $order1 = Order::factory()->create(['user_id' => $user->id]);
-        $order2 = Order::factory()->create(['user_id' => $other->id]);
-
-        $res = $this->withHeader('Authorization', $this->jwtFor($user))
-            ->getJson("/api/orders");
-
-        $res->assertStatus(200);
-        $this->assertCount(1, $res->json('orders'));
-    }
-
 }

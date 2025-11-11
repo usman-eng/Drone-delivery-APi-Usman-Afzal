@@ -16,7 +16,7 @@ class OrderController extends Controller
     // Submit order
     public function store(OrderRequest $request)
     {
-        // DB::beginTransaction();
+        DB::beginTransaction();
         try {
             $user = $request->attributes->get('actor');
             $order = OrderRepository::createOrder(
@@ -30,13 +30,13 @@ class OrderController extends Controller
                 ]),
                 $user->id
             );
-         
-            // DB::commit();
+
+            DB::commit();
             $order->refresh();
             return ApiResponse::success($order, 'Order created successfully', 201);
 
         } catch (Throwable $e) {
-            // DB::rollBack();
+            DB::rollBack();
             return ApiResponse::error('Failed to create order', [
                 'exception' => $e->getMessage(),
             ], 500);
@@ -46,7 +46,7 @@ class OrderController extends Controller
     // Withdraw order (if not picked up yet)
     public function withdraw(Request $request, $id)
     {
-        // DB::beginTransaction();
+        DB::beginTransaction();
         try {
             $user = $request->attributes->get('actor');
             $order = Order::find($id);
@@ -66,12 +66,12 @@ class OrderController extends Controller
             // Update order
             $order = OrderRepository::withdrawOrder($order);
 
-            // DB::commit();
+            DB::commit();
 
             return ApiResponse::success($order, 'Order withdrawn successfully');
 
         } catch (Throwable $e) {
-            // DB::rollBack();
+            DB::rollBack();
             return ApiResponse::error('Failed to withdraw order', [
                 'exception' => $e->getMessage()
             ], 500);
